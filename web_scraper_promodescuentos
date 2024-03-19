@@ -1,0 +1,52 @@
+import os
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+def get_desktop_path():
+    # Obtener la ruta del escritorio según el sistema operativo
+    desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
+    return desktop_path
+
+def scrape_promodescuentos(search_query):
+    # URL de la página de búsqueda de Promodescuentos
+    url = f'https://www.promodescuentos.com/search?q={search_query}'
+    
+    # Realizar solicitud HTTP
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Encontrar todos los contenedores de ofertas
+        items = soup.find_all('article', class_='thread')
+        
+        desktop_path = get_desktop_path()
+        csv_file_path = os.path.join(desktop_path, 'ofertas_promodescuentos.csv')
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['Titulo', 'Precio', 'Enlace'])  # Escribir el encabezado
+            
+            for item in items:
+                title = item.find('a', class_='cept-tt').text.strip()
+                
+                # Intentar obtener el precio, si existe
+                price = item.find('span', class_='thread-price')
+                price = price.text.strip() if price else 'N/A'
+                
+                # Construir el enlace completo
+                link = item.find('a', class_='cept-tt')['href']
+                full_link = f'https://www.promodescuentos.com{link}'
+                
+                # Escribir los datos en el archivo CSV
+                writer.writerow([title, price, full_link])
+                
+        print(f"Los datos han sido guardados en '{csv_file_path}' en el escritorio.")
+    else:
+        print("Error al obtener la página:", response.status_code)
+
+# Consulta de búsqueda en Promodescuentos
+search_query = 'laptop%20gamer'
+
+# Llamar a la función de scraping
+scrape_promodescuentos(search_query)
