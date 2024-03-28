@@ -1,0 +1,1 @@
+#Existen dos tipos principales de heaps: heap máximo y heap mínimo. En un heap máximo, el valor del nodo padre es mayor que los valores de sus hijos. En un heap mínimo, el valor del nodo padre es menor que los valores de sus hijos.
